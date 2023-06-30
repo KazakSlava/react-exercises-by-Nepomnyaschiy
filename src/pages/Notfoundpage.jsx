@@ -1,8 +1,10 @@
-import {link} from 'react-router-dom'
+
+import { CustomLink } from "../components/CustomLink"
+
 const Notfoundpage = () => {
    return (
       <div>
-         This page doesn't exist. Go <link to="/">home</link>
+         This page doesn't exist. Go <CustomLink to="/">home</CustomLink>
       </div>
    )
 }
