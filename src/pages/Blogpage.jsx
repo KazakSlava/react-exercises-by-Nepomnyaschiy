@@ -1,55 +1,73 @@
-import { useState, useEffect } from "react"
-import { Link, useLocation, useSearchParams} from "react-router-dom"
-import { BlogFilter } from "../components/BlogFilter";
+import { Suspense } from "react"
+import {
+   Link,
+   useLoaderData,
+   useSearchParams,
+   Await,
+   defer,
+} from "react-router-dom"
+import { BlogFilter } from "../components/BlogFilter"
 
 const Blogpage = () => {
-   const [posts, setPosts] = useState([])
-   const [searchParams, setSearchParams] = useSearchParams();
-   // console.log(useLocation())
-   const postQury = searchParams.get('post') || '';
-   const latest = searchParams.has('latest');
-   const startsFrom = latest ? 80 : 1;
+   const { posts } = useLoaderData()
+   const [searchParams, setSearchParams] = useSearchParams()
 
-   // const handleSubmit = (e) => {
-   //    e.preventDefault();
-   //    const form = e.target;
-   //    const query = form.search.value;
-   //    const isLatest = form.latest.checked;
-   //    const params = {};
+   const postQuery = searchParams.get("post") || ""
+   const latest = searchParams.has("latest")
 
-   //    if (query.length) params.post = query;
-   //    if (isLatest) params.latest = true;
-
-   //    setSearchParams(params);
-   // }
-
-   useEffect(() => {
-      fetch("https://jsonplaceholder.typicode.com/posts")
-         .then((res) => res.json())
-         .then((data) => setPosts(data))
-   }, [])
+   const startsFrom = latest ? 80 : 1
 
    return (
       <div>
          <h1>Our news</h1>
-         <BlogFilter postQury={postQury} latest ={latest} setSearchParams = {setSearchParams }/>
-         {/* <form autoComplete="off" onSubmit={handleSubmit}>
-            <input type="search" name="search"/>
-            <label style={{padding:'0 1rem'}}> 
-               <input type="checkbox" name="latest"/> New only
-            </label>
-            <input type="submit" name="Search"/>
-         </form> */}
-         <Link to="/posts/new">Add new post</Link>
-         {posts.filter(
-            post =>post.title.includes(postQury) && posts.id >= startsFrom
-         ).map((post) => (
-            <Link key={post.id} to={`/posts/${post.id}`}>
-               <li>{post.title}</li>
-            </Link>
-         ))}
+
+         <BlogFilter
+            postQuery={postQuery}
+            latest={latest}
+            setSearchParams={setSearchParams}
+         />
+
+         <Link
+            to="/posts/new"
+            style={{ margin: "1rem 0", display: "inline-block" }}
+         >
+            Add new post
+         </Link>
+         <Suspense fallback={<h2>Loading...</h2>}>
+            <Await resolve={posts}>
+               {(resolvedPosts) => (
+                  <>
+                     {resolvedPosts
+                        .filter(
+                           (post) =>
+                              post.title.includes(postQuery) &&
+                              post.id >= startsFrom
+                        )
+                        .map((post) => (
+                           <Link key={post.id} to={`/posts/${post.id}`}>
+                              <li>{post.title}</li>
+                           </Link>
+                        ))}
+                  </>
+               )}
+            </Await>
+         </Suspense>
       </div>
    )
 }
 
-export { Blogpage }
+async function getPosts() {
+   const res = await fetch("https://jsonplaceholder.typicode.com/posts")
+
+   return res.json()
+}
+
+const blogLoader = async () => {
+   // console.log({ request, params })
+
+   return defer({
+      posts: getPosts(),
+   })
+}
+
+export { Blogpage, blogLoader }
