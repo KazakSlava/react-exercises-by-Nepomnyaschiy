@@ -12,7 +12,9 @@ const Layout = () => {
          <main className="container">
             <Outlet />
          </main>
-         <footer className="container">2021</footer>
+         <footer className="container">
+            &copy; ReactRouter Tutorials 2023
+         </footer>
       </>
    )
 }

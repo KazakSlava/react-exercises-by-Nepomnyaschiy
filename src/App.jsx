@@ -12,11 +12,12 @@ import { Homepage } from "./pages/Homepage"
 import { Notfoundpage } from "./pages/Notfoundpage"
 import { Layout } from "./components/Layout"
 import { Singlepage, postLoader } from "./pages/Singlepage"
-import { Createpost } from "./pages/Createpost"
-import { Editpost } from "./pages/Editpost"
+import { Createpost, createPostAction } from "./pages/Createpost"
+import { Editpost, updatePostAction } from "./pages/Editpost"
 import { LoginPage } from "./pages/Loginpage"
 import { RequireAuth } from "./hoc/RequireAuth"
 import { AuthProvider } from "./hoc/AuthProvider"
+import { ErrorPage } from "./pages/Errorpage"
 
 const router = createBrowserRouter(
    createRoutesFromElements(
@@ -27,9 +28,19 @@ const router = createBrowserRouter(
             <Route path="team" element={<p>Our team</p>} />
          </Route>
          <Route path="about-us" element={<Navigate to="/about" replace />} />
-         <Route path="posts" element={<Blogpage />} loader={blogLoader} />
+         <Route
+            path="posts"
+            element={<Blogpage />}
+            loader={blogLoader}
+            errorElement={<ErrorPage />}
+         />
          <Route path="posts/:id" element={<Singlepage />} loader={postLoader} />
-         <Route path="posts/:id/edit" element={<Editpost />} />
+         <Route
+            path="posts/:id/edit"
+            element={<Editpost />}
+            loader={postLoader}
+            action={updatePostAction}
+         />
          <Route
             path="posts/new"
             element={
@@ -37,6 +48,7 @@ const router = createBrowserRouter(
                   <Createpost />
                </RequireAuth>
             }
+            action={createPostAction}
          />
          <Route path="login" element={<LoginPage />} />
          <Route path="*" element={<Notfoundpage />} />

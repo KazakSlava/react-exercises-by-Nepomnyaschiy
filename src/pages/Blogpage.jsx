@@ -4,7 +4,8 @@ import {
    useLoaderData,
    useSearchParams,
    Await,
-   defer,
+   /*defer*/
+   json,
 } from "react-router-dom"
 import { BlogFilter } from "../components/BlogFilter"
 
@@ -58,16 +59,23 @@ const Blogpage = () => {
 
 async function getPosts() {
    const res = await fetch("https://jsonplaceholder.typicode.com/posts")
-
+   // if (!res.ok) {
+   //    throw new Response("", { status: res.status, statusText: "Not found " })
+   // }
    return res.json()
 }
 
 const blogLoader = async () => {
    // console.log({ request, params })
+   const posts = await getPosts()
 
-   return defer({
-      posts: getPosts(),
-   })
+   if (!posts.length) {
+      throw json({ message: "Not Found", reason: "Wrong URL" }, { status: 404 })
+   }
+
+   return {
+      posts,
+   }
 }
 
 export { Blogpage, blogLoader }
